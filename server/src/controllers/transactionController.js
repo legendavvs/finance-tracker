@@ -28,51 +28,65 @@ const addTransaction = async (req, res) => {
 };
 
 // Отримати список транзакцій (з фільтрами та пагінацією!)
+// Отримати список транзакцій (з фільтрами)
 const getTransactions = async (req, res) => {
   const userId = req.user.id;
-
-  // Читаємо параметри з URL (наприклад: ?page=1&limit=10&type=expense)
+  
+  // Отримуємо параметри з адреси запиту
   const page = parseInt(req.query.page) || 1;
-  const limit = parseInt(req.query.limit) || 10;
+  const limit = parseInt(req.query.limit) || 50;
   const offset = (page - 1) * limit;
-
-  const type = req.query.type; // 'income' або 'expense' (опціонально)
+  
+  const { search, month, year, type } = req.query; // <--- НОВІ ПАРАМЕТРИ
 
   try {
-    // Формуємо запит динамічно
+    // Початковий запит
     let queryText = `
       SELECT t.*, c.name as category_name, c.icon as category_icon, c.color as category_color
       FROM transactions t
       LEFT JOIN categories c ON t.category_id = c.id
       WHERE t.user_id = $1
     `;
-
+    
+    // Масив значень для SQL ($1, $2...)
     const queryParams = [userId];
+    let paramCount = 1;
 
-    // Якщо клієнт просить тільки витрати або тільки доходи
+    // 1. Фільтр по типу (витрата/дохід)
     if (type) {
-      queryText += ` AND t.type = $2`;
+      paramCount++;
+      queryText += ` AND t.type = $${paramCount}`;
       queryParams.push(type);
     }
 
-    // Додаємо сортування та пагінацію
-    queryText += ` ORDER BY t.date DESC, t.id DESC LIMIT $${queryParams.length + 1} OFFSET $${queryParams.length + 2}`;
+    // 2. Пошук по опису (ILIKE = ігнорує регістр)
+    if (search) {
+      paramCount++;
+      queryText += ` AND t.description ILIKE $${paramCount}`;
+      queryParams.push(`%${search}%`); // Додаємо % для пошуку часткового співпадіння
+    }
+
+    // 3. Фільтр по місяцю і року
+    if (month && year) {
+      // Postgres функція EXTRACT витягує частину дати
+      paramCount++;
+      queryText += ` AND EXTRACT(MONTH FROM t.date) = $${paramCount}`;
+      queryParams.push(month);
+      
+      paramCount++;
+      queryText += ` AND EXTRACT(YEAR FROM t.date) = $${paramCount}`;
+      queryParams.push(year);
+    }
+
+    // Сортування і пагінація
+    queryText += ` ORDER BY t.date DESC, t.id DESC LIMIT $${paramCount + 1} OFFSET $${paramCount + 2}`;
     queryParams.push(limit, offset);
 
     const { rows } = await db.query(queryText, queryParams);
-
-    // Також дізнаємось загальну кількість (для пагінації на фронті)
-    const countQuery = `SELECT COUNT(*) FROM transactions WHERE user_id = $1 ${type ? "AND type = '" + type + "'" : ""}`;
-    const countRes = await db.query(countQuery, [userId]);
-
-    res.json({
-      transactions: rows,
-      totalPages: Math.ceil(countRes.rows[0].count / limit),
-      currentPage: page
-    });
-
+    
+    res.json({ transactions: rows });
   } catch (err) {
-    console.error(err);
+    console.error("Error getting transactions:", err);
     res.status(500).json({ error: 'Помилка отримання транзакцій' });
   }
 };

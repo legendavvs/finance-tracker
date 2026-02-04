@@ -4,6 +4,7 @@ const {
     addTransaction,
     getTransactions,
     deleteTransaction,
+    updateTransaction,
     getTransactionStats,   // <--- Перевір, чи є це
     getCategoryStats       // <--- Перевір, чи є це
 } = require('../controllers/transactionController');
@@ -22,6 +23,7 @@ router.get('/', getTransactions);
 
 // 3. І тільки в самому кінці - маршрути з параметрами (:id)
 // Бо якщо поставити це вище, воно перехопить слово "stats" як id
+router.put('/:id', updateTransaction);
 router.delete('/:id', deleteTransaction);
 
 module.exports = router;

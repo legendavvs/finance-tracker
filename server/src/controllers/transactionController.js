@@ -77,6 +77,43 @@ const getTransactions = async (req, res) => {
   }
 };
 
+const updateTransaction = async (req, res) => {
+  const { id } = req.params;
+  const { amount, type, category_id, date, description } = req.body;
+  const userId = req.user.id;
+
+  try {
+    // Перевіряємо, чи належить транзакція цьому користувачу
+    const checkQuery = 'SELECT * FROM transactions WHERE id = $1 AND user_id = $2';
+    const checkRes = await db.query(checkQuery, [id, userId]);
+
+    if (checkRes.rows.length === 0) {
+      return res.status(404).json({ error: 'Транзакцію не знайдено' });
+    }
+
+    // Оновлюємо
+    const updateQuery = `
+      UPDATE transactions 
+      SET amount = $1, type = $2, category_id = $3, date = $4, description = $5
+      WHERE id = $6 AND user_id = $7
+      RETURNING *;
+    `;
+
+    const values = [amount, type, category_id, date, description || '', id, userId];
+    const { rows } = await db.query(updateQuery, values);
+
+    res.json(rows[0]);
+  } catch (err) {
+    console.error("Error updating transaction:", err);
+    res.status(500).json({ error: 'Помилка оновлення' });
+  }
+};
+
+
+
+
+
+
 // Видалити транзакцію
 const deleteTransaction = async (req, res) => {
   const { id } = req.params;
@@ -157,4 +194,4 @@ const getCategoryStats = async (req, res) => {
   }
 };
 
-module.exports = { addTransaction, getTransactions, deleteTransaction, getTransactionStats, getCategoryStats };
+module.exports = { addTransaction, getTransactions, deleteTransaction,updateTransaction, getTransactionStats, getCategoryStats, };

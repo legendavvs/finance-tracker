@@ -2,6 +2,7 @@ const express = require('express');
 const cors = require('cors');
 const helmet = require('helmet');
 const morgan = require('morgan');
+const userRoutes = require('./routes/users');
 require('dotenv').config();
 
 // Ми імпортуємо db, але не створюємо Pool тут!
@@ -22,6 +23,7 @@ app.use(morgan('dev'));
 
 // Підключення маршрутів
 app.use('/api/auth', authRoutes);
+app.use('/api/users', userRoutes);
 app.use('/api/categories', categoryRoutes);
 app.use('/api/transactions', transactionRoutes);
 

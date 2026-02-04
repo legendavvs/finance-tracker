@@ -2,7 +2,7 @@ import { useState } from 'react';
 import { Outlet, useNavigate, useLocation } from 'react-router-dom';
 import { 
   Box, Toolbar, AppBar, Typography, IconButton, Drawer, List, 
-  ListItem, ListItemButton, ListItemIcon, ListItemText, Divider, Container 
+  ListItem, ListItemButton, ListItemIcon, ListItemText, Divider, Container
 } from '@mui/material';
 import { 
   Menu as MenuIcon, 
@@ -10,7 +10,8 @@ import {
   ReceiptLong as TransactionsIcon, 
   Category as CategoryIcon,
   Logout as LogoutIcon,
-  AccountBalanceWallet as WalletIcon 
+  AccountBalanceWallet as WalletIcon, 
+  Settings as SettingsIcon
 } from '@mui/icons-material';
 import { useDispatch, useSelector } from 'react-redux';
 import { logout } from '../redux/slices/authSlice';
@@ -38,6 +39,7 @@ const MainLayout = () => {
     { text: 'Дашборд', icon: <DashboardIcon />, path: '/' },
     { text: 'Транзакції', icon: <TransactionsIcon />, path: '/transactions' },
     { text: 'Категорії', icon: <CategoryIcon />, path: '/categories' },
+    { text: 'Налаштування', icon: <SettingsIcon />, path: '/settings' },
   ];
 
   const drawer = (

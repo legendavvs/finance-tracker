@@ -1,19 +1,17 @@
 import axios from 'axios';
 
-// Створюємо екземпляр з базовими налаштуваннями
 const instance = axios.create({
-  baseURL: '/api', // Завдяки проксі у vite.config.js це піде на localhost:5000
+  // Магія: якщо є змінна середовища (на Vercel), беремо її.
+  // Якщо немає (на комп'ютері), беремо localhost.
+  baseURL: import.meta.env.VITE_API_URL || 'http://localhost:5000/api',
 });
 
-// --- МАГІЯ (Interceptor) ---
-// Перед кожним запитом цей код перевіряє, чи є токен у localStorage
+// Додаємо токен до кожного запиту, якщо він є
 instance.interceptors.request.use((config) => {
   const token = window.localStorage.getItem('token');
-  
   if (token) {
     config.headers.Authorization = `Bearer ${token}`;
   }
-  
   return config;
 });
 

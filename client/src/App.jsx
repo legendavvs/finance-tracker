@@ -3,7 +3,8 @@ import { useSelector } from 'react-redux';
 import LoginPage from './pages/LoginPage';
 import RegisterPage from './pages/RegisterPage';
 import DashboardPage from './pages/DashboardPage'; // Імпортуємо нову сторінку
-import MainLayout from './layouts/MainLayout'; // Імпортуємо макет
+import MainLayout from './layouts/MainLayout';
+import TransactionsPage from './pages/TransactionsPage';   // Імпортуємо макет
 
 // Тимчасові заглушки для інших сторінок
 const Placeholder = ({ title }) => <h1>{title} (В розробці)</h1>;
@@ -23,6 +24,7 @@ function App() {
         {/* Всі ці маршрути будуть мати Sidebar і Header */}
         <Route path="/" element={<PrivateRoute><MainLayout /></PrivateRoute>}>
           <Route index element={<DashboardPage />} />
+          <Route path="transactions" element={<TransactionsPage />} />
           <Route path="transactions" element={<Placeholder title="Транзакції" />} />
           <Route path="categories" element={<Placeholder title="Категорії" />} />
         </Route>

@@ -5,7 +5,7 @@ import RegisterPage from './pages/RegisterPage';
 import DashboardPage from './pages/DashboardPage'; // Імпортуємо нову сторінку
 import MainLayout from './layouts/MainLayout';
 import TransactionsPage from './pages/TransactionsPage';   // Імпортуємо макет
-
+import CategoriesPage from './pages/CategoriesPage';
 // Тимчасові заглушки для інших сторінок
 const Placeholder = ({ title }) => <h1>{title} (В розробці)</h1>;
 
@@ -26,6 +26,7 @@ function App() {
           <Route index element={<DashboardPage />} />
           <Route path="transactions" element={<TransactionsPage />} />
           <Route path="transactions" element={<Placeholder title="Транзакції" />} />
+          <Route path="categories" element={<CategoriesPage />} />
           <Route path="categories" element={<Placeholder title="Категорії" />} />
         </Route>
       </Routes>

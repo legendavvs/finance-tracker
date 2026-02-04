@@ -1,0 +1,21 @@
+/* Імпортуємо шрифт прямо в CSS */
+@import url('https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600;700&family=Inter:wght@400;500;600&display=swap');
+
+/* Жорстко задаємо правила для всього сайту */
+* {
+  font-family: 'Poppins', sans-serif !important;
+}
+
+/* Для цифр використовуємо Inter (він кращий для таблиць) */
+.MuiTypography-body1, 
+.MuiTypography-body2, 
+.MuiTypography-subtitle1, 
+.MuiTypography-subtitle2 {
+  font-family: 'Inter', sans-serif !important;
+}
+
+body {
+  margin: 0;
+  background-color: #0B0F19; /* Темний фон */
+  -webkit-font-smoothing: antialiased; /* Робить шрифт гладким */
+}

@@ -3,6 +3,7 @@ const cors = require('cors');
 const helmet = require('helmet');
 const morgan = require('morgan');
 const userRoutes = require('./routes/users');
+const chatRoutes = require('./routes/chat');
 require('dotenv').config();
 
 // Ми імпортуємо db, але не створюємо Pool тут!
@@ -26,6 +27,7 @@ app.use('/api/auth', authRoutes);
 app.use('/api/users', userRoutes);
 app.use('/api/categories', categoryRoutes);
 app.use('/api/transactions', transactionRoutes);
+app.use('/api/chat', chatRoutes);
 
 // Запуск сервера
 const PORT = process.env.PORT || 5000;

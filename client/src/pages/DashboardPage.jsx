@@ -10,6 +10,8 @@ import StatCard from '../components/StatCard';
 import TransactionFormModal from '../components/TransactionFormModal';
 import ChartSection from '../components/ChartSection'; // <--- 1. ІМПОРТ ДІАГРАМИ
 
+import AIChatWidget from '../components/AIChatWidget';
+
 const DashboardPage = () => {
     const [loading, setLoading] = useState(true);
     const [recentTransactions, setRecentTransactions] = useState([]);
@@ -106,6 +108,20 @@ const DashboardPage = () => {
                             <Typography color="text.secondary">Тут буде історія ваших витрат.</Typography>
                         )}
                     </Box>
+                </Grid>
+                {/* AI Чат-Віджет */}
+                <Grid container spacing={3}>
+                    {/* Графіки ... */}
+
+                    {/* Ліва колонка - Транзакції */}
+                    <Grid item xs={12} md={8}>
+                        {/* ... тут твій код таблиці транзакцій ... */}
+                    </Grid>
+
+                    {/* Права колонка - ЧАТ */}
+                    <Grid item xs={12} md={4}>
+                        <AIChatWidget />
+                    </Grid>
                 </Grid>
             </Grid>
 

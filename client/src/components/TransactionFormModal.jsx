@@ -102,8 +102,8 @@ const TransactionFormModal = ({ open, onClose, onSuccess, transactionToEdit }) =
               onChange={handleTypeChange}
               color="primary"
             >
-              <ToggleButton value="expense" color="error">Витрата</ToggleButton>
-              <ToggleButton value="income" color="success">Дохід</ToggleButton>
+              <ToggleButton value="expense" color="error" sx={{ fontWeight: 'bold' }}>Витрата</ToggleButton>
+              <ToggleButton value="income" color="success" sx={{ fontWeight: 'bold' }}>Дохід</ToggleButton>
             </ToggleButtonGroup>
           </Box>
 

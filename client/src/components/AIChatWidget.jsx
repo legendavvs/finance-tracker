@@ -2,8 +2,10 @@ import { useState } from 'react';
 import { Box, Paper, Typography, TextField, Button, CircularProgress, Avatar } from '@mui/material';
 import { Send as SendIcon, AutoAwesome as AIIcon } from '@mui/icons-material';
 import axios from '../utils/axios';
+import { useTheme } from '@mui/material/styles';
 
 const AIChatWidget = () => {
+    const theme = useTheme();
     const [input, setInput] = useState('');
     const [messages, setMessages] = useState([
         { role: 'ai', text: 'Привіт! Я твій AI-помічник. Спитай мене, як зекономити гроші! 🤖' }
@@ -40,8 +42,15 @@ const AIChatWidget = () => {
                 {messages.map((msg, index) => (
                     <Box key={index} sx={{
                         alignSelf: msg.role === 'user' ? 'flex-end' : 'flex-start',
-                        bgcolor: msg.role === 'user' ? 'primary.main' : 'rgba(255,255,255,0.05)',
-                        color: 'white',
+
+                        // 2. ФОН: Для юзера - синій. Для AI: у темній темі - сірий прозорий, у світлій - світло-сірий (#f0f0f0)
+                        bgcolor: msg.role === 'user'
+                            ? 'primary.main'
+                            : (theme.palette.mode === 'dark' ? 'rgba(255,255,255,0.05)' : '#f0f0f0'),
+
+                        // 3. ТЕКСТ: Для юзера - білий. Для AI - беремо "text.primary" (він сам стане чорним у світлій темі)
+                        color: msg.role === 'user' ? 'white' : 'text.primary',
+
                         p: 1.5,
                         borderRadius: 2,
                         maxWidth: '80%'

@@ -8,8 +8,8 @@ import * as Yup from 'yup';
 import axios from '../utils/axios';
 import { useSnackbar } from 'notistack';
 
-// Додали проп "transactionToEdit"
-const TransactionFormModal = ({ open, onClose, onSuccess, transactionToEdit }) => {
+// <--- 1. ДОДАВ initialValues В АРГУМЕНТИ
+const TransactionFormModal = ({ open, onClose, onSuccess, transactionToEdit, initialValues }) => {
   const { enqueueSnackbar } = useSnackbar();
   const [categories, setCategories] = useState({ income: [], expense: [] });
   const [type, setType] = useState('expense');
@@ -38,6 +38,32 @@ const TransactionFormModal = ({ open, onClose, onSuccess, transactionToEdit }) =
       formik.setFieldValue('date', new Date().toISOString().split('T')[0]);
     }
   }, [transactionToEdit, open]);
+
+  // ============================================================
+  // <--- 2. НОВИЙ ЕФЕКТ ДЛЯ ГОЛОСОВИХ ДАНИХ (initialValues)
+  // ============================================================
+  useEffect(() => {
+    // Спрацьовує, тільки якщо це НЕ редагування і є дані від AI
+    if (open && initialValues && !transactionToEdit) {
+      console.log("Дані від AI отримано:", initialValues);
+      
+      // 1. Встановлюємо тип (витрата/дохід)
+      if (initialValues.type) {
+        setType(initialValues.type);
+      }
+
+      // 2. Заповнюємо поля через Formik
+      formik.setValues({
+        amount: initialValues.amount || '',
+        description: initialValues.description || '',
+        // Увага: AI повертає "categoryId", а форма чекає "category_id"
+        category_id: initialValues.categoryId || '', 
+        date: new Date().toISOString().split('T')[0],
+      });
+    }
+  }, [initialValues, open, transactionToEdit]);
+  // ============================================================
+
 
   const fetchCategories = async () => {
     try {

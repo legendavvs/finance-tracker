@@ -8,17 +8,21 @@ import {
 import axios from '../utils/axios';
 import StatCard from '../components/StatCard';
 import TransactionFormModal from '../components/TransactionFormModal';
-import ChartSection from '../components/ChartSection'; // <--- 1. ІМПОРТ ДІАГРАМИ
-
+import ChartSection from '../components/ChartSection';
 import AIChatWidget from '../components/AIChatWidget';
+import VoiceInput from '../components/VoiceInput'; // 1. Додав імпорт
 
 const DashboardPage = () => {
     const [loading, setLoading] = useState(true);
     const [recentTransactions, setRecentTransactions] = useState([]);
-    const [chartData, setChartData] = useState([]); // <--- 2. ДАНІ ДЛЯ ДІАГРАМИ
+    const [chartData, setChartData] = useState([]);
     const [isModalOpen, setIsModalOpen] = useState(false);
 
     const [stats, setStats] = useState({ income: 0, expense: 0, balance: 0 });
+
+    // 2. Нові стейти для голосу
+    const [aiFormData, setAiFormData] = useState(null);
+    const [voiceLoading, setVoiceLoading] = useState(false);
 
     useEffect(() => {
         fetchDashboardData();
@@ -26,11 +30,10 @@ const DashboardPage = () => {
 
     const fetchDashboardData = async () => {
         try {
-            // Запускаємо всі запити паралельно для швидкості
             const [txRes, statsRes, chartRes] = await Promise.all([
                 axios.get('/transactions?limit=5'),
                 axios.get('/transactions/stats'),
-                axios.get('/transactions/categories-stats') // <--- 3. ЗАПИТ ДІАГРАМИ
+                axios.get('/transactions/categories-stats')
             ]);
 
             setRecentTransactions(txRes.data.transactions);
@@ -44,6 +47,33 @@ const DashboardPage = () => {
         }
     };
 
+    // 3. Функція обробки результату з мікрофона
+    const handleVoiceResult = async (text) => {
+        console.log("🎤 1. Голос розпізнано:", text); // <--- МАЯЧОК 1
+        setVoiceLoading(true);
+        try {
+            console.log("🚀 2. Відправляю на сервер..."); // <--- МАЯЧОК 2
+            const { data } = await axios.post('/chat/parse', { text });
+            console.log("✅ 3. Сервер відповів:", data); // <--- МАЯЧОК 3
+            
+            setAiFormData({
+                amount: data.amount,
+                description: data.description || text,
+                categoryId: data.categoryId || '',
+                type: data.type || 'expense'
+            });
+            console.log("🔓 4. Відкриваю вікно..."); // <--- МАЯЧОК 4
+            setIsModalOpen(true); // Відкриваємо форму з даними
+            
+        } catch (error) {
+            console.error(error);
+            alert("Не вдалося розпізнати команду. Спробуйте ще раз.");
+            console.error("❌ ПОМИЛКА:", error);
+        } finally {
+            setVoiceLoading(false);
+        }
+    };
+
     if (loading) return <Box sx={{ display: 'flex', justifyContent: 'center', mt: 10 }}><CircularProgress color="primary" /></Box>;
 
     return (
@@ -51,17 +81,27 @@ const DashboardPage = () => {
             {/* Header */}
             <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', mb: 4 }}>
                 <Typography variant="h4" sx={{ fontWeight: 'bold' }}>Огляд фінансів</Typography>
-                <Button
-                    variant="contained"
-                    startIcon={<AddIcon />}
-                    onClick={() => setIsModalOpen(true)}
-                    sx={{
-                        background: 'linear-gradient(135deg, #6366F1 0%, #4338CA 100%)',
-                        px: 3, py: 1, fontWeight: 'bold', boxShadow: '0 4px 14px 0 rgba(99, 102, 241, 0.4)'
-                    }}
-                >
-                    Додати транзакцію
-                </Button>
+                
+                {/* Група кнопок: Додати + Мікрофон */}
+                <Box sx={{ display: 'flex', gap: 2, alignItems: 'center' }}>
+                    <Button
+                        variant="contained"
+                        startIcon={<AddIcon />}
+                        onClick={() => {
+                            setAiFormData(null); // Очищаємо старі дані AI при ручному відкритті
+                            setIsModalOpen(true);
+                        }}
+                        sx={{
+                            background: 'linear-gradient(135deg, #6366F1 0%, #4338CA 100%)',
+                            px: 3, py: 1, fontWeight: 'bold', boxShadow: '0 4px 14px 0 rgba(99, 102, 241, 0.4)'
+                        }}
+                    >
+                        Додати транзакцію
+                    </Button>
+                    
+                    {/* 4. Кнопка мікрофона */}
+                    <VoiceInput onResult={handleVoiceResult} disabled={voiceLoading} />
+                </Box>
             </Box>
 
             {/* Статистика */}
@@ -80,12 +120,12 @@ const DashboardPage = () => {
             {/* --- ОСНОВНА СЕКЦІЯ: ДІАГРАМА + ТРАНЗАКЦІЇ --- */}
             <Grid container spacing={4}>
 
-                {/* Ліва колонка: Діаграма (займає 7 колонок на великих екранах) */}
+                {/* Ліва колонка: Діаграма */}
                 <Grid item xs={12} md={7}>
                     <ChartSection data={chartData} />
                 </Grid>
 
-                {/* Права колонка: Останні транзакції (займає 5 колонок) */}
+                {/* Права колонка: Останні транзакції */}
                 <Grid item xs={12} md={5}>
                     <Typography variant="h6" sx={{ mb: 2, fontWeight: 'bold' }}>Останні операції</Typography>
                     <Box sx={{ display: 'flex', flexDirection: 'column', gap: 2 }}>
@@ -109,23 +149,26 @@ const DashboardPage = () => {
                         )}
                     </Box>
                 </Grid>
-                {/* AI Чат-Віджет */}
-                <Grid container spacing={3}>
-                    {/* Графіки ... */}
 
-                    {/* Ліва колонка - Транзакції */}
+                {/* AI Чат-Віджет (залишив як у тебе було) */}
+                <Grid container spacing={3}>
                     <Grid item xs={12} md={8}>
-                        {/* ... тут твій код таблиці транзакцій ... */}
+                       {/* Пусте місце або контент, як у тебе було */}
                     </Grid>
 
-                    {/* Права колонка - ЧАТ */}
                     <Grid item xs={12} md={4}>
                         <AIChatWidget />
                     </Grid>
                 </Grid>
             </Grid>
 
-            <TransactionFormModal open={isModalOpen} onClose={() => setIsModalOpen(false)} onSuccess={fetchDashboardData} />
+            {/* 5. Передаємо initialValues у форму */}
+            <TransactionFormModal 
+                open={isModalOpen} 
+                onClose={() => setIsModalOpen(false)} 
+                onSuccess={fetchDashboardData} 
+                initialValues={aiFormData} // <--- ВАЖЛИВО
+            />
         </Box>
     );
 };
